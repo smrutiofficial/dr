@@ -31,14 +31,15 @@ def convert_svg_to_png(svg_path):
         return None
 
 
-def get_gui_apps_with_icons():
+
+def get_gui_apps_with_updates_and_icons():
     try:
         # Command to find and filter .desktop files
         desktop_files_cmd = (
             "find /usr/share/applications ~/.local/share/applications -name '*.desktop' -exec basename {} \\; | "
             "sed 's/\\.desktop$//' | "
             "sed 's/^\\(com\\|org\\)\\..*//' | "
-            "sed -E '/^(gnome-|dev\\.|ibus-|ca\\.|display-|nm-|hp.*|xdg-|gcr|io-|io.|usb-|nautilus-|docker-|apport-gtk|bluetooth-|qemu|python3.12|rygel|im-|gkbd-|feh|geoclue-|snap-|yelp|code-|software-)/d'"
+            "sed -E '/^(gnome-|dev\\.|ibus-|ca\\.|display-|nm-|openjdk*|hp.*|xdg-|gcr|io-|io.|usb-|nautilus-|docker-*|apport-gtk|bluetooth-|qemu|python3.12|rygel|im-|gkbd-|feh|geoclue-|snap-|yelp|code-|software-)/d'"
         )
         desktop_files_result = subprocess.run(
             desktop_files_cmd,
@@ -50,6 +51,24 @@ def get_gui_apps_with_icons():
 
         # Get the filtered list of .desktop file names
         desktop_file_names = desktop_files_result.stdout.splitlines()
+
+        # Get list of upgradable packages
+        apt_update_cmd = "sudo apt list --upgradable"
+        apt_update_result = subprocess.run(
+            apt_update_cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            text=True,
+            check=True
+        )
+        upgradable_packages = apt_update_result.stdout.splitlines()
+        
+        # Parse upgradable packages for their names
+        upgradable_names = set(
+            line.split('/')[0]
+            for line in upgradable_packages
+            if '/' in line
+        )
 
         apps_with_icons = []
 
@@ -97,10 +116,14 @@ def get_gui_apps_with_icons():
                 # Use the desktop file name as the app name
                 app_name = desktop_file_name
 
+                # Check if the app is upgradable
+                has_update = app_name.lower() in upgradable_names
+
                 # Add the app to the list
                 apps_with_icons.append({
                     "name": app_name,
                     "icon": icon_path or placeholder_icon,
+                    "update_available": has_update,
                 })
             except Exception as e:
                 print(f"Error processing {desktop_file_name}: {e}")
@@ -108,10 +131,10 @@ def get_gui_apps_with_icons():
         return apps_with_icons
     except Exception as e:
         print(f"Error fetching GUI applications: {e}")
-        return [{"name": "Error", "icon": None}]
+        return [{"name": "Error", "icon": None, "update_available": False}]
 
-# Test the function
-installed_apps = get_gui_apps_with_icons()
+# Example usage
+apps = get_gui_apps_with_updates_and_icons()
 
 def get_installed_apps_flatpak():
     try:
@@ -161,20 +184,27 @@ def get_apps_with_updates_flatpak():
 
 
 # Function to populate the list of apps
+# Function to populate the list of apps
 def populate_list(package_type):
     for label in result_labels:
         label.destroy()
     result_labels.clear()
 
     if package_type == "APT":
-        apps = get_gui_apps_with_icons()
-        updates = []
+        apps = get_gui_apps_with_updates_and_icons()
+        updates = []  # Updates list isn't required for APT as it is handled by `update_available` field.
     elif package_type == "Flatpak":
         apps = get_installed_apps_flatpak()
         updates = get_apps_with_updates_flatpak()  # Fetch update list
     else:
         apps = ["No valid package manager selected."]
         updates = []
+
+    # Sort apps alphabetically by name
+    if isinstance(apps, list) and len(apps) > 0 and isinstance(apps[0], dict):
+        apps = sorted(apps, key=lambda app: app['name'].lower())
+    elif isinstance(apps, list):
+        apps = sorted(apps, key=str.lower)
 
     for index, app in enumerate(apps, start=1):
         app_frame = ctk.CTkFrame(scrollable_frame, fg_color="#222a34")
@@ -210,9 +240,17 @@ def populate_list(package_type):
             width=100,
             command=lambda app=app: uninstall_app(app, package_type)
             )
-
         uninstall_button.pack(side="right", padx=(0, 20))
 
+        # Add update button for APT apps if an update is available
+        if package_type == "APT" and app.get("update_available"):
+            update_button = ctk.CTkButton(
+                app_frame, text="Update", fg_color="#90a470", width=100,
+                command=lambda app=app: update_apt_app(app['name'])
+            )
+            update_button.pack(side="right", padx=5)
+
+        # Add update button for Flatpak apps if an update is available
         if package_type == "Flatpak":
             app_name = app.get('name', "Unknown App") if isinstance(app, dict) else app
             ref = app.get('ref') if isinstance(app, dict) else None
@@ -225,6 +263,16 @@ def populate_list(package_type):
                 update_button.pack(side="right", padx=5)
 
         result_labels.append(app_frame)
+
+
+# Function to update APT apps
+def update_apt_app(app_name):
+    try:
+        subprocess.run(['sudo', 'apt-get', 'upgrade', app_name, '-y'], check=True)
+        print(f"Successfully updated {app_name}")
+        populate_list("APT")
+    except Exception as e:
+        print(f"Error updating {app_name}: {e}")
 
 
 def uninstall_app(app_id,package_type):
