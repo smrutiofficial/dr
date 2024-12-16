@@ -224,7 +224,16 @@ def populate_list(package_type):
                     icon_label.pack(side="left", padx=(20, 10), pady=15)
             except Exception as e:
                 print(f"Error loading icon: {e}")
+    # Filter apps based on search query
+        # if search_query:
+        #     apps = [
+        #         app for app in apps
+        #         if search_query.lower() in app.get("name", "").lower()
+        #     ]
 
+        # Display total count
+        total_label.configure(text=f"Total Apps ({len(apps)})")
+        
         app_label = ctk.CTkLabel(
             app_frame,
             text=f"{app['name']}" if isinstance(app, dict) else app,
@@ -338,6 +347,32 @@ def start_tray_icon():
     icon.menu = (item('Exit', exit_action),)
     icon.run()
 
+
+
+def update_all_apps(package_type):
+    if package_type == "APT":
+        command = "sudo apt upgrade -y"
+        populate_list("APT")
+    elif package_type == "Flatpak":
+        command = "flatpak update -y"
+        populate_list("Flatpak")
+    else:
+        return
+
+    try:
+        subprocess.run(command, shell=True, check=True)
+        print("All apps updated successfully.")
+        populate_list(package_type)
+    except Exception as e:
+        print(f"Error updating apps: {e}")
+
+
+# def on_search_input(event):
+#     search_query = search_var.get()
+#     populate_list(selected_package, search_query)
+
+
+# --------------------------------------------------------------------
 # Create the CTk window
 app = ctk.CTk(fg_color="#151c26")
 app.geometry("1000x600")
@@ -347,26 +382,71 @@ icon = PhotoImage(file=icon_path)
 # Set the icon for the application
 app.wm_iconphoto(True, icon)
 
-row_frame = ctk.CTkFrame(app, fg_color="#151c26")
-row_frame.pack(pady=10)
+# =============================================
+# Top section: Search, Total Apps, Update All
+top_frame = ctk.CTkFrame(app, fg_color="#151c26")
+top_frame.pack(fill="x", padx=20, pady=0)
 
+# Create a frame to hold the search entry and make it expand
+center_frame = ctk.CTkFrame(top_frame, fg_color="#29303a")
+center_frame.pack(fill="x", expand=True, padx=20, pady=10)
+
+# Use grid layout inside center_frame
+center_frame.grid_columnconfigure(0, weight=1)  # Make column 0 expandable
+
+# Dropdown and Total Apps section
 selected_package = ctk.StringVar()
 selected_package.set("Flatpak")
 
-dropdown = ctk.CTkComboBox(row_frame, variable=selected_package, values=["Flatpak", "APT"],font=("",14),width=200)
-dropdown.grid(row=0, column=0, padx=5)
+dpt = ctk.CTkFrame(center_frame, fg_color="#29303a")  # Add a frame for dropdown and label
+dpt.grid(row=0, column=0, padx=10, pady=5, sticky="w")
 
-populate_button = ctk.CTkButton(
-    row_frame, text="Show Apps", fg_color="#90a470", bg_color="#151c26",
-    command=lambda: populate_list(selected_package.get())
+dropdown = ctk.CTkComboBox(
+    dpt,
+    fg_color="#222a34",
+    variable=selected_package,
+    values=["Flatpak", "APT"],
+    font=("", 14),
+    width=200,
+    command=lambda selection: populate_list(selection)
 )
-populate_button.grid(row=0, column=1, padx=5)
-# total app no in list
-# a search input box
-# update all button
+dropdown.grid(row=0, column=0, padx=10, pady=5, sticky="w")
+
+total_label = ctk.CTkLabel(dpt, text="Total Apps (0)", font=("", 12))
+total_label.grid(row=0, column=1, padx=10, pady=5, sticky="w")
+
+# Search Entry
+# search_var = tk.StringVar(value="")
+# search_var.trace_add("write", lambda *args: on_search_input(None))
+
+search_entry = ctk.CTkEntry(
+    center_frame, 
+    # textvariable=search_var,
+    placeholder_text='Search app name ...', 
+    placeholder_text_color="#565b5e",
+    fg_color="#222a34", 
+    width=350
+)
+search_entry.grid(row=0, column=1, padx=20, pady=5, sticky="ew")
+
+# Update Button
+updateall = ctk.CTkButton(
+    center_frame, text="Update all", fg_color="#90a470", bg_color="#151c26"
+)
+updateall.grid(row=0, column=2, padx=20, pady=5, sticky="e")
+
+
+
+
+# ================================================
+
+# row_frame = ctk.CTkFrame(app, fg_color="#151c26")
+# row_frame.pack(pady=10)
+
+# ================================================
 
 scrollable_frame = ctk.CTkScrollableFrame(app, height=2000, fg_color="#151c26")
-scrollable_frame.pack(fill="both", padx=10, pady=10)
+scrollable_frame.pack(fill="both", padx=10, pady=(0,10))
 
 scrollable_frame.bind_all("<Button-4>", lambda e: scrollable_frame._parent_canvas.yview("scroll", -1, "units"))
 scrollable_frame.bind_all("<Button-5>", lambda e: scrollable_frame._parent_canvas.yview("scroll", 1, "units"))
