@@ -1,0 +1,6 @@
+Package: Dr-linux
+Version: 1.0
+Architecture: all
+Maintainer: Smruti Prakash Rout <smrutiprakashrout3@gmail.com>
+Description: A simple Python program for managing Linux applications.
+Depends: python3,python3-pip

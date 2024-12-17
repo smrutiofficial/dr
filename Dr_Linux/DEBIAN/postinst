@@ -1,0 +1,50 @@
+#!/bin/bash
+set -e  # Exit immediately if a command exits with a non-zero status.
+
+# Define key variables
+SCRIPT_PATH="/bin/drlinux.py"  # Path to the main application script
+VENV_DIR="/opt/drlinux_venv"  # Path to the virtual environment
+DESKTOP_FILE="/usr/share/applications/dr-linux.desktop"  # Path for the .desktop file
+ICON_PATH="/usr/share/icons/hicolor/256x256/apps/drlinux.png"  # Path to the app icon
+
+# Step 1: Ensure pip3 and necessary system packages are installed
+if ! command -v pip3 >/dev/null 2>&1; then
+    echo "Installing pip3 and necessary Python packages..."
+    apt-get update
+    apt-get install -y python3-pip python3-venv python3-tk python3-pil.imagetk
+fi
+
+# Step 2: Create a virtual environment if it doesn't exist
+if [ ! -d "$VENV_DIR" ]; then
+    echo "Creating a virtual environment at $VENV_DIR..."
+    python3 -m venv "$VENV_DIR"
+fi
+
+# Step 3: Activate the virtual environment and install dependencies
+echo "Activating the virtual environment and installing dependencies..."
+source "$VENV_DIR/bin/activate"
+pip install --upgrade customtkinter pillow cairosvg pystray
+deactivate
+
+# # Step 4: Create the .desktop file
+# echo "Creating the .desktop file for Dr. Linux..."
+# sudo bash -c "cat > $DESKTOP_FILE" <<EOF
+# [Desktop Entry]
+# Version=1.0
+# Name=Dr. Linux
+# Comment=A GUI tool to manage Linux applications
+# StartupWMClass=dr-linux
+# Exec=$VENV_DIR/bin/python $SCRIPT_PATH
+# Icon=$ICON_PATH
+# Terminal=false
+# Type=Application
+# Categories=Utility;System;
+# EOF
+
+# # Step 5: Set the correct permissions for the .desktop file
+# sudo chmod 644 "$DESKTOP_FILE"
+
+# Step 6: Optional - Post-install message
+echo "Dr. Linux has been installed successfully."
+# echo "You can launch Dr. Linux from the application menu or run:"
+# echo "$VENV_DIR/bin/python $SCRIPT_PATH"
