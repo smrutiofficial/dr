@@ -1,6 +1,8 @@
 <div align="center">
-![Linux App Manager GUI](./assets/drlinux.png)
-<h2>DR. LINUX</h2>
+   <picture>
+      <img src="./assets/drlinux.png">
+   </picture>
+   <h2>Dr. Linux</h2>
 <div>
 <div align="center">
 
