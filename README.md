@@ -38,22 +38,16 @@ Linux App Manager GUI is a user-friendly software for managing Linux application
    cd linux-app-manager
    ```
 
-2. Install dependencies:
+2. Build & Run the application:
    ```bash
-   sudo apt update
-   sudo apt install python3 python3-tk
-   ```
-
-3. Run the application:
-   ```bash
-   python3 main.py
+   bash ./run.sh
    ```
 
 ## Usage
 
 1. Launch the application.
 2. Use the navigation menu to explore installed applications, uninstall unwanted apps, or check for updates.
-3. Select an application to perform the desired action (install/uninstall/update).
+3. Select an application to perform the desired action (uninstall/update).
 
 ## Requirements
 
@@ -77,6 +71,3 @@ Linux App Manager GUI is a user-friendly software for managing Linux application
    git push origin feature-name
    ```
 5. Open a pull request.
-
-
-# My Project
