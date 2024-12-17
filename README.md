@@ -11,10 +11,10 @@
 ![Static Badge](https://img.shields.io/badge/License-MIT-yellow)
 ![Static Badge](https://img.shields.io/badge/total_Lines-45k-red)
 
-</div>
-
 | Linux App Manager GUI |
 |-----------------------|
+</div>
+
 
 # Dr.Linux
 
