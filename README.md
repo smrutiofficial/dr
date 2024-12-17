@@ -1,5 +1,7 @@
+<div align="center">
 ![Linux App Manager GUI](./Dr_Linux/usr/share/icons/hicolor/256x256/apps/drlinux.png)
-
+<h2>DR. LINUX</h2>
+<div>
 <div align="center">
 
 ![Static Badge](https://img.shields.io/badge/drlinux-v1.1.0-blue)  
