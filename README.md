@@ -1,5 +1,5 @@
 <div align="center">
-![Linux App Manager GUI](./Dr_Linux/usr/share/icons/hicolor/256x256/apps/drlinux.png)
+![Linux App Manager GUI](./assets/drlinux.png)
 <h2>DR. LINUX</h2>
 <div>
 <div align="center">
