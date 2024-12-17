@@ -1,9 +1,18 @@
 ![Linux App Manager GUI](./Dr_Linux/usr/share/icons/hicolor/256x256/apps/drlinux.png)
 
+<div align="center">
+
+![Static Badge](https://img.shields.io/badge/drlinux-v1.1.0-blue)  
+![Static Badge](https://img.shields.io/badge/downloads-10+-green)
+![Static Badge](https://img.shields.io/badge/License-MIT-yellow)
+![Static Badge](https://img.shields.io/badge/total_Lines-45k-red)
+
+<div>
+
 | Linux App Manager GUI |
 |-----------------------|
 
-# Linux App Manager GUI
+# Dr.Linux
 
 Linux App Manager GUI is a user-friendly software for managing Linux applications through a graphical user interface. It supports application installation, uninstallation, and updates using package managers like Flatpak, APT, Snap, and DEB files. 
 
